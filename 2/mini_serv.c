@@ -7,6 +7,14 @@
 #include <netinet/in.h>
 #include <sys/select.h>
 
+// A 5
+// R 4
+// Send msg 3
+// register 6
+// remove 5
+// send msg 6
+// notify other 3
+
 fd_set afds, rfds, wfds;
 int max_fd = 0, client_count = 0;
 char buf_read[1001], buf_write[42];

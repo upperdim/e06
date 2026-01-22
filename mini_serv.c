@@ -90,7 +90,7 @@ void send_msg(int fd) {
 	while (extract_message(&msgs[fd], &msg)) {
 		sprintf(buf_write, "client %d: ", ids[fd]);
 		notify_other(fd, buf_write);
-		notify_other(fd, msgs[fd]);
+		notify_other(fd, msg);
 		free(msg);
 	}
 }

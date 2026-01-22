@@ -21,6 +21,8 @@ char buf_read[1001], buf_write[42];
 char *msgs[65000];
 int ids[65000];
 
+void notify_other(int author, char *str); //prototype
+
 int extract_message(char **buf, char **msg) {
 	char	*newbuf;
 	int	i;
@@ -83,17 +85,31 @@ void register_client(int fd) {
 
 // 5
 void remove_client(int fd) {
-
+	sprintf(buf_write, "server: client %d just left\n", ids[fd]);
+	notify_other(fd, buf_write);
+	free(msgs[fd]);
+	FD_CLR(fd, &afds);
+	close(fd);
 }
 
 // 6
 void send_msg(int fd) {
-
+	char *msg;
+	while (extract_message(msgs[fd], msg)) {
+		sprintf(buf_write, "client %d: ", ids[fd]);
+		notify_other(fd, buf_write);
+		notify_other(fd, msg);
+		free(msg);
+	}
 }
 
 // 3
-void notify_other(int author, char *msg) {
-
+void notify_other(int author, char *str) {
+	for (int fd = 0; fd <= max_fd; ++fd) {
+		if (FD_ISSET(fd, &wfds) && fd != author) {
+			send(fd, str, strlen(str), 0);
+		}
+	}
 }
 
 int	main(int argc, char **argv) {

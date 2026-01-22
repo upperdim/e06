@@ -14,6 +14,8 @@ char buf_read[1001], buf_write[42];
 int ids[65000];
 char *msgs[65000];
 
+void notify_other(int author, char *str); // prototype
+
 int extract_message(char **buf, char **msg) {
 	char	*newbuf;
 	int	i;
@@ -127,7 +129,7 @@ int main(int argc, char **argv) {
 	// assign IP, PORT
 	servaddr.sin_family = AF_INET;
 	servaddr.sin_addr.s_addr = htonl(2130706433); //127.0.0.1
-	servaddr.sin_port = htons(av[1]);
+	servaddr.sin_port = htons(atoi(argv[1]));
 
 	// Binding newly created socket to given IP and verification
 	if ((bind(sockfd, (const struct sockaddr *)&servaddr, sizeof(servaddr))) != 0) {

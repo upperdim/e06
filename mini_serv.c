@@ -6,6 +6,7 @@
 #include <netinet/in.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/select.h>
 
 int max_fd = 0, client_count = 0;
 fd_set afds, rfds, wfds;
@@ -58,33 +59,52 @@ char *str_join(char *buf, char *add) {
 	return (newbuf);
 }
 
-void ft_puts(char *s) {
-	write(1, s, strlen(s));
+void err(char *s) {
+	write(2, s, strlen(s));
 }
 
 // 6
 void register_client(int fd) {
-
+	max_fd = fd > max_fd ? fd : max_fd;
+	ids[fd] = client_count++;
+	msgs[fd] = NULL;
+	FD_SET(fd, &afds);
+	sprintf(buf_write, "server: client %d just arrived\n", ids[fd]);
+	notify_other(fd, buf_write);
 }
 
 // 5
 void remove_client(int fd) {
-
+	sprintf(buf_write, "server: client %d just left\n", ids[fd]);
+	notify_other(fd, buf_write);
+	free(msgs[fd]);
+	FD_CLR(fd, &afds);
+	close(fd);
 }
 
 // 6
 void send_msg(int fd) {
-
+	char *msg;
+	while (extract_message(&msgs[fd], &msg)) {
+		sprintf(buf_write, "client %d: ", ids[fd]);
+		notify_other(fd, buf_write);
+		notify_other(fd, msgs[fd]);
+		free(msg);
+	}
 }
 
 // 3
 void notify_other(int author, char *str) {
-
+	for (int fd = 0; fd <= max_fd; ++fd) {
+		if (FD_ISSET(fd, &wfds) && fd != author) {
+			send(fd, str, strlen(str), 0);
+		}
+	}
 }
 
 int main(int argc, char **argv) {
 	if (argc !=2) {
-		ft_puts("Wrong number of arguments\n");
+		err("Wrong number of arguments\n");
 		exit(1);
 	}
 
@@ -96,7 +116,7 @@ int main(int argc, char **argv) {
 	// socket create and verification
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (sockfd == -1) {
-		ft_puts("socket creation failed...\n");
+		err("Fatal error\n");
 		exit(1);
 	}
 	max_fd = sockfd;
@@ -111,11 +131,11 @@ int main(int argc, char **argv) {
 
 	// Binding newly created socket to given IP and verification
 	if ((bind(sockfd, (const struct sockaddr *)&servaddr, sizeof(servaddr))) != 0) {
-		ft_puts("Fatal error\n");
+		err("Fatal error\n");
 		exit(1);
 	}
 	if (listen(sockfd, 10) != 0) {
-		ft_puts("Fatal error\n");
+		err("Fatal error\n");
 		exit(1);
 	}
 	// len = sizeof(servaddr);
@@ -129,7 +149,7 @@ int main(int argc, char **argv) {
 	while (1) {
 		wfds = rfds = afds;
 		if (select(max_fd + 1, &rfds, &wfds, NULL, NULL) < 0) {
-			ft_puts("Fatal error\n");
+			err("Fatal error\n");
 			exit(1);
 		}
 
@@ -145,7 +165,7 @@ int main(int argc, char **argv) {
 					break;
 				}
 			}
-			// Remove 3
+			// Remove, 3
 			ssize_t bytes_read = recv(fd, buf_read, 1000, 0);
 			if (bytes_read <= 0) {
 				remove_client(fd);

@@ -108,7 +108,7 @@ int main(int argc, char **argv) {
 		exit(1);
 	}
 
-	int sockfd, connfd, len;
+	int sockfd;
 	struct sockaddr_in servaddr;
 	
 	FD_ZERO(&afds);
@@ -127,7 +127,7 @@ int main(int argc, char **argv) {
 	// assign IP, PORT
 	servaddr.sin_family = AF_INET;
 	servaddr.sin_addr.s_addr = htonl(2130706433); //127.0.0.1
-	servaddr.sin_port = htons(8081);
+	servaddr.sin_port = htons(av[1]);
 
 	// Binding newly created socket to given IP and verification
 	if ((bind(sockfd, (const struct sockaddr *)&servaddr, sizeof(servaddr))) != 0) {

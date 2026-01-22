@@ -165,7 +165,7 @@ int main(int argc, char **argv) {
 					break;
 				}
 			}
-			// Remove, 3
+			// Remove, 4
 			ssize_t bytes_read = recv(fd, buf_read, 1000, 0);
 			if (bytes_read <= 0) {
 				remove_client(fd);

@@ -6,6 +6,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <sys/select.h>
+#include <stdio.h> // sprintf
 
 // A 5
 // R 4
@@ -95,7 +96,7 @@ void remove_client(int fd) {
 // 6
 void send_msg(int fd) {
 	char *msg;
-	while (extract_message(msgs[fd], msg)) {
+	while (extract_message(&msgs[fd], &msg)) {
 		sprintf(buf_write, "client %d: ", ids[fd]);
 		notify_other(fd, buf_write);
 		notify_other(fd, msg);

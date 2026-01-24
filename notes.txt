@@ -11,3 +11,4 @@ Checksums
 
 Common mistakes
 	#3: select() args: (num_fds, ptr_read_fds, ptr_write_fds, NULL, NULL)
+	#4: send() args: msgs[fd] instead of str, 
